@@ -5,7 +5,7 @@ USER root
 # Install gcc, c++, and related dependencies needed for pip to build some python dependencies
 RUN sudo apt-get -y update && \
     apt-get install -y --reinstall build-essential gcc cargo && \
-    rm -rf /var/lib/apt/lists/ 
+    rm -rf /var/lib/apt/lists/
 
 # Install Spark-Solr
 ENV SPARK_SOLR_VERSION=4.0.2
@@ -28,14 +28,14 @@ WORKDIR /home/$NB_USER
 
 # Install Python dependencies
 COPY build/requirements.txt ./
-ENV BLIS_ARCH="generic" 
+ENV BLIS_ARCH="generic"
 ENV PIP_CACHE_DIR=/var/cache/pip
 RUN mkdir -p $PIP_CACHE_DIR
 RUN --mount=type=cache,target=$PIP_CACHE_DIR \
     python -m pip install --upgrade pip && \
     pip install -r requirements.txt && \
     python -m spacy download en_core_web_sm
-RUN rm requirements.txt   
+RUN rm requirements.txt
 
 # Configure home directory
 COPY build/log4j.properties /usr/local/spark/conf/
@@ -60,16 +60,16 @@ ENV SPARK_OPTS="$SPARK_OPTS --driver-java-options=\"-DXlint:none -Dlog4j.logLeve
     PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-*-src.zip:%PYTHONPATH% \
     DOCKER_STACKS_JUPYTER_CMD=lab
 
-# If you want to edit the notebooks and have your changes persist, 
+# If you want to edit the notebooks and have your changes persist,
 # uncomment the line below and restart with `docker compose up --build`
-#WORKDIR /tmp/notebooks
+WORKDIR /tmp/notebooks
 
 # Mark all notebooks as trusted by default
-RUN find . -name \*.ipynb -print0|xargs -0 jupyter-trust -y
+# RUN find . -name \*.ipynb -print0|xargs -0 jupyter-trust -y
 
-# Start Jupyter Notebooks
-RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
-CMD start-notebook.sh --ServerApp.password='' \
-  --ServerApp.token='' --NotebookApp.token='' --LabApp.token='' \
-  --LabApp.default_url='/lab/tree/chapters/welcome.ipynb' \
-  --NotebookApp.allow_origin='*' --NotebookApp.ip='0.0.0.0' --ServerApp.ip=0.0.0.0 --no-browser
+# # Start Jupyter Notebooks
+# RUN jupyter labextension disable "@jupyterlab/apputils-extension:announcements"
+# CMD start-notebook.sh --ServerApp.password='' \
+#   --ServerApp.token='' --NotebookApp.token='' --LabApp.token='' \
+#   --LabApp.default_url='/lab/tree/chapters/welcome.ipynb' \
+#   --NotebookApp.allow_origin='*' --NotebookApp.ip='0.0.0.0' --ServerApp.ip=0.0.0.0 --no-browser
